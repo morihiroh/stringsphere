@@ -82,7 +82,32 @@ struct LevenshteinDistance : public StringDistance {
 
 struct DamerauLevenshteinDistance : public StringDistance {
     int operator()(const std::vector<int>& x, const std::vector<int>& y) {
-      return 0;
+      const int InsertCost = 1;
+      const int DeleteCost = 1;
+      const int SubstCost = 1;
+      int xsize = x.size();
+      int ysize = y.size();
+      boost::multi_array<int, 2> d(boost::extents[xsize][ysize]);
+
+      for (int i = 0; i <= xsize; i++) {
+        d[i][0] = i;
+      }
+      for (int j = 1; j <= ysize; j++) {
+        d[0][j] = j;
+      }
+      for (int i = 1; i <= xsize; i++) {
+        for (int j = 1; j <= ysize; j++) {
+          int cost = (x[i - 1] == y[j - 1]) ? 0 : SubstCost;
+          d[i][j] = std::min(std::min(
+              d[i - 1][j] + InsertCost,
+              d[i][j - 1] + DeleteCost),
+              d[i - 1][j - 1] + cost);
+          if (i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1]) {
+            d[i][j] = std::min(d[i][j], d[i - 2][j - 2] + cost);
+          }
+        }
+      }
+      return d[xsize][ysize];
     }
 };
 
