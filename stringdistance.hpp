@@ -59,7 +59,7 @@ struct LevenshteinDistance : public StringDistance {
       const int SubstCost = 1;
       int xsize = x.size();
       int ysize = y.size();
-      boost::multi_array<int, 2> d(boost::extents[xsize][ysize]);
+      boost::multi_array<int, 2> d(boost::extents[xsize + 1][ysize + 1]);
 
       for (int i = 0; i <= xsize; i++) {
         d[i][0] = i;
@@ -87,7 +87,7 @@ struct DamerauLevenshteinDistance : public StringDistance {
       const int SubstCost = 1;
       int xsize = x.size();
       int ysize = y.size();
-      boost::multi_array<int, 2> d(boost::extents[xsize][ysize]);
+      boost::multi_array<int, 2> d(boost::extents[xsize + 1][ysize + 1]);
 
       for (int i = 0; i <= xsize; i++) {
         d[i][0] = i;
