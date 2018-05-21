@@ -111,10 +111,49 @@ struct DamerauLevenshteinDistance : public StringDistance {
     }
 };
 
-struct JaroWinklerDistance : public StringDistance {
-    int operator()(const std::vector<int>& x, const std::vector<int>& y) {
-      return 0;
+struct JaroWinklerDistance {
+  double operator()(const std::vector<int>& x, const std::vector<int>& y) {
+    int xsize = x.size();
+    int ysize = y.size();
+    if (xsize == 0) {
+      if (ysize == 0)
+        return 1.0;
+      else
+        return 0.0;
     }
+    int match_dist = std::max(xsize, ysize)/2 - 1;
+    std::vector<bool> x_matches(xsize, false), y_matches(ysize, false);
+    double m = 0.0;
+    double t = 0.0;
+    for (int i = 0; i < xsize; i++) {
+      const int start = std::max(0, i - match_dist);
+      const int end = std::min(i + match_dist + 1, ysize);
+      for (int j = start; j < end; j++) {
+        if (y_matches[j]) continue;
+        if (x[i] != y[j]) continue;
+        x_matches[i] = true;
+        y_matches[j] = true;
+        m++;
+        break;
+      }
+    }
+    if (m == 0) 
+      return 0.0;
+
+    int j = 0;
+    for (int i = 0; i < xsize; i++) {
+      if (not x_matches[i]) continue;
+      while (not y_matches[j]) {
+        j++;
+      }
+      if (x[i] != y[j]) {
+        t++;
+      }
+      j++;
+    }
+    t /= 2.0;
+    return (m/xsize + m/ysize + (m - t)/m)/3.0;
+  }
 };
 
 static void print(const std::vector<int>& s) {
@@ -173,7 +212,7 @@ void count(int& tildeu, int& tildev, // estimated values
       sn[i] = agen(mt);
     }
     //print(sn);
-    int d = distfunc(center, sn);
+    auto d = distfunc(center, sn);
     //std::cout << "d: " << d << "\n";
     if (d <= radius) {
       xn++;
