@@ -25,7 +25,11 @@ int main(int argc, char **argv)
   po::options_description opt("Allowed options");
 
   opt.add_options()
-    ("distance,d", po::value<int>()->default_value(0), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein 4: Jaro-Winkler")
+    ("distance,d", po::value<int>()->default_value(0), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein"
+#ifndef DISABLE_JAROWINKLER
+" 4: Jaro-Winkler"
+#endif
+)
     ("alpha,a", po::value<double>()->default_value(0.1), ": 100xalpha/2 percent point of gaussian")
     ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
     ("center,c", po::value<std::string>()->default_value("0,0,0"), ": center string in integers from 0 to k-1 with comma delimiter")
@@ -68,9 +72,11 @@ int main(int argc, char **argv)
       case 3:
         searchall(u, v, k, center, radius, DamerauLevenshteinDistance(), alpha);
         break;
+#ifndef DISABLE_JAROWINKLER
       case 4:
         searchall(u, v, k, center, radius, JaroWinklerDistance(), alpha);
         break;
+#endif
     };
     std::cout << "u = " << u << "\tv = " << v << "\n";
   } else {
@@ -88,9 +94,11 @@ int main(int argc, char **argv)
       case 3:
         count(tildeu, tildev, hatu, hatv, k, center, radius, DamerauLevenshteinDistance(), alpha, lowerbound, iterations);
         break;
+#ifndef DISABLE_JAROWINKLER
       case 4:
         count(tildeu, tildev, hatu, hatv, k, center, radius, JaroWinklerDistance(), alpha, lowerbound, iterations);
         break;
+#endif
     };
     std::cout << "~u = " << tildeu << "\t~v = " << tildev << "\t ^u = " << hatu << "\t ^v = " << hatv << "\n";
   }

@@ -5,6 +5,8 @@
 #include <boost/math/distributions/normal.hpp>
 #include <boost/multi_array.hpp>
 
+#define DISABLE_JAROWINKLER
+
 struct StringDistance {
   virtual int operator()(const std::vector<int>& x, const std::vector<int>& y) = 0;
 };
@@ -111,6 +113,7 @@ struct DamerauLevenshteinDistance : public StringDistance {
     }
 };
 
+#ifndef DISABLE_JAROWINKLER
 struct JaroWinklerDistance {
   double operator()(const std::vector<int>& x, const std::vector<int>& y) {
     int xsize = x.size();
@@ -155,13 +158,16 @@ struct JaroWinklerDistance {
     return (m/xsize + m/ysize + (m - t)/m)/3.0;
   }
 };
+#endif
 
+#if 0
 static void print(const std::vector<int>& s) {
   for (auto c : s) {
     std::cout << c;
   }
   std::cout << "\n";
 }
+#endif
 
 template <typename DistancePred>
 void count(int& tildeu, int& tildev, // estimated values
