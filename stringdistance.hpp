@@ -12,7 +12,7 @@ struct CompareSimilarity {};
 struct ExtendedHammingDistance {
   typedef CompareDistance CompareType;
 };
-struct LongestCommonSubsequenceDistance {
+struct LongestCommonSubsequence {
   typedef CompareSimilarity CompareType;
 };
 struct LevenshteinDistance {
@@ -39,7 +39,7 @@ int measure(const std::vector<int>& x, const std::vector<int>& y, ExtendedHammin
   return cost;
 }
 
-int measure(const std::vector<int>& x, const std::vector<int>& y, LongestCommonSubsequenceDistance) {
+int measure(const std::vector<int>& x, const std::vector<int>& y, LongestCommonSubsequence) {
   int xsize = x.size();
   int ysize = y.size();
   boost::multi_array<int, 2> d(boost::extents[xsize + 1][ysize + 1]);

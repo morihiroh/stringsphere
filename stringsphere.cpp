@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         searchall(u, v, k, center, radius, ExtendedHammingDistance(), alpha);
         break;
       case 1:
-        searchall(u, v, k, center, radius, LongestCommonSubsequenceDistance(), alpha);
+        searchall(u, v, k, center, radius, LongestCommonSubsequence(), alpha);
         break;
       case 2:
         searchall(u, v, k, center, radius, LevenshteinDistance(), alpha);
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
         count(tildeu, tildev, hatu, hatv, k, center, radius, ExtendedHammingDistance(), alpha, lowerbound, iterations);
         break;
       case 1:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, LongestCommonSubsequenceDistance(), alpha, lowerbound, iterations);
+        count(tildeu, tildev, hatu, hatv, k, center, radius, LongestCommonSubsequence(), alpha, lowerbound, iterations);
         break;
       case 2:
         count(tildeu, tildev, hatu, hatv, k, center, radius, LevenshteinDistance(), alpha, lowerbound, iterations);
