@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   po::options_description opt("Allowed options");
 
   opt.add_options()
-    ("distance,d", po::value<int>()->default_value(0), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein"
+    ("distance,d", po::value<int>()->default_value(2), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein"
 #ifndef DISABLE_JAROWINKLER
 " 4: Jaro-Winkler"
 #endif
@@ -59,44 +59,50 @@ int main(int argc, char **argv)
 
   if (argmap.count("searchall")) {
     int u, v;
+    auto searchallfunc = [&](auto dist) {
+        searchall(u, v, k, center, radius, dist, alpha);
+    };
     switch (distancetype) {
       case 0:
-        searchall(u, v, k, center, radius, ExtendedHammingDistance(), alpha);
+        searchallfunc(ExtendedHammingDistance());
         break;
       case 1:
-        searchall(u, v, k, center, radius, LongestCommonSubsequence(), alpha);
+        searchallfunc(LongestCommonSubsequence());
         break;
       case 2:
-        searchall(u, v, k, center, radius, LevenshteinDistance(), alpha);
+        searchallfunc(LevenshteinDistance());
         break;
       case 3:
-        searchall(u, v, k, center, radius, DamerauLevenshteinDistance(), alpha);
+        searchallfunc(DamerauLevenshteinDistance());
         break;
 #ifndef DISABLE_JAROWINKLER
       case 4:
-        searchall(u, v, k, center, radius, JaroWinklerDistance(), alpha);
+        searchallfunc(JaroWinklerDistance());
         break;
 #endif
     };
     std::cout << "u = " << u << "\tv = " << v << "\n";
   } else {
     int tildeu, tildev, hatu, hatv;
+    auto countfunc = [&](auto dist) {
+      count(tildeu, tildev, hatu, hatv, k, center, radius, dist, alpha, lowerbound, iterations);
+    };
     switch (distancetype) {
       case 0:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, ExtendedHammingDistance(), alpha, lowerbound, iterations);
+        countfunc(ExtendedHammingDistance());
         break;
       case 1:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, LongestCommonSubsequence(), alpha, lowerbound, iterations);
+        countfunc(LongestCommonSubsequence());
         break;
       case 2:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, LevenshteinDistance(), alpha, lowerbound, iterations);
+        countfunc(LevenshteinDistance());
         break;
       case 3:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, DamerauLevenshteinDistance(), alpha, lowerbound, iterations);
+        countfunc(DamerauLevenshteinDistance());
         break;
 #ifndef DISABLE_JAROWINKLER
       case 4:
-        count(tildeu, tildev, hatu, hatv, k, center, radius, JaroWinklerDistance(), alpha, lowerbound, iterations);
+        countfunc(JaroWinklerDistance());
         break;
 #endif
     };
