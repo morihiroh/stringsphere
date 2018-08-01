@@ -195,7 +195,12 @@ void count(int& tildeu, int& tildev, // estimated values
   int lstart = center.size() - radius;
   int lend = center.size() + radius;
 
-  double kmc = std::pow(k, lend) - ((lstart >= 1) ? std::pow(k, lstart - 1) : 0.0); // k^(|s|+r) - c
+  double kmc; // sum i=0~(|s|+r) k^i - c
+  if (lstart >= 1) {
+    kmc = std::pow(k, lstart) * (std::pow(k, 2 * radius + 1) - 1) / (k - 1); // k^(|s|-r)*(k^(2r+1)-1)/(k-1)
+  } else {
+    kmc = (std::pow(k, lend + 1) - 1) / (k - 1); // (k^(|s|+r+1)-1)/(k-1)
+  }
 
   if (lstart < 0) {
     lstart = 0;
