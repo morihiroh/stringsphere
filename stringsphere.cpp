@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 " 4: Jaro-Winkler"
 #endif
 )
-    ("alpha,a", po::value<double>()->default_value(0.1), ": 100xalpha/2 percent point of gaussian")
+    ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
     ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
     ("center,c", po::value<std::string>()->default_value("0,0,0"), ": center string in integers from 0 to k-1 with comma delimiter")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
