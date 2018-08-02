@@ -37,6 +37,7 @@ int main(int argc, char **argv)
     ("lowerbound,l", po::value<int>()->default_value(10000), ": the lower bound of # randomly generated strings")
     ("iterations,i", po::value<int>()->default_value(100), ": # of iterations that estimated values are equal (convergence test).")
     ("searchall,s", ": search all instead of the stochastic method")
+    ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
 
   po::variables_map argmap;
@@ -81,7 +82,11 @@ int main(int argc, char **argv)
         break;
 #endif
     };
-    std::cout << "u = " << u << "\tv = " << v << "\n";
+    if (argmap.count("quiet")) {
+      std::cout << u << '\t' << v << '\t';
+    } else {
+      std::cout << "u = " << u << "\tv = " << v << "\n";
+    }
   } else {
     int tildeu, tildev, hatu, hatv;
     auto countfunc = [&](auto dist) {
@@ -106,7 +111,11 @@ int main(int argc, char **argv)
         break;
 #endif
     };
-    std::cout << "~u = " << tildeu << "\t~v = " << tildev << "\t ^u = " << hatu << "\t ^v = " << hatv << "\n";
+    if (argmap.count("quiet")) {
+      std::cout << tildeu << "\t" << tildev << "\t" << hatu << "\t" << hatv << "\t";
+    } else {
+      std::cout << "~u = " << tildeu << "\t~v = " << tildev << "\t ^u = " << hatu << "\t ^v = " << hatv << "\n";
+    }
   }
 
   return EXIT_SUCCESS;
