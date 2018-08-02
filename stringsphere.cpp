@@ -58,30 +58,36 @@ int main(int argc, char **argv)
   int lowerbound = argmap["lowerbound"].as<int>();
   int iterations = argmap["iterations"].as<int>();
 
+  auto swfunc = [](int distancetype, auto func) {
+    switch (distancetype) {
+      case 0:
+        func(ExtendedHammingDistance());
+        break;
+      case 1:
+        func(LongestCommonSubsequence());
+        break;
+      case 2:
+        func(LevenshteinDistance());
+        break;
+      case 3:
+        func(DamerauLevenshteinDistance());
+        break;
+#ifndef DISABLE_JAROWINKLER
+      case 4:
+        func(JaroWinklerDistance());
+        break;
+#endif
+    }
+  };
+
   if (argmap.count("searchall")) {
     int u, v;
     auto searchallfunc = [&](auto dist) {
         searchall(u, v, k, center, radius, dist, alpha);
     };
-    switch (distancetype) {
-      case 0:
-        searchallfunc(ExtendedHammingDistance());
-        break;
-      case 1:
-        searchallfunc(LongestCommonSubsequence());
-        break;
-      case 2:
-        searchallfunc(LevenshteinDistance());
-        break;
-      case 3:
-        searchallfunc(DamerauLevenshteinDistance());
-        break;
-#ifndef DISABLE_JAROWINKLER
-      case 4:
-        searchallfunc(JaroWinklerDistance());
-        break;
-#endif
-    };
+
+    swfunc(distancetype, searchallfunc);
+
     if (argmap.count("quiet")) {
       std::cout << u << '\t' << v << '\t';
     } else {
@@ -92,25 +98,9 @@ int main(int argc, char **argv)
     auto countfunc = [&](auto dist) {
       count(tildeu, tildev, hatu, hatv, k, center, radius, dist, alpha, lowerbound, iterations);
     };
-    switch (distancetype) {
-      case 0:
-        countfunc(ExtendedHammingDistance());
-        break;
-      case 1:
-        countfunc(LongestCommonSubsequence());
-        break;
-      case 2:
-        countfunc(LevenshteinDistance());
-        break;
-      case 3:
-        countfunc(DamerauLevenshteinDistance());
-        break;
-#ifndef DISABLE_JAROWINKLER
-      case 4:
-        countfunc(JaroWinklerDistance());
-        break;
-#endif
-    };
+
+    swfunc(distancetype, countfunc);
+
     if (argmap.count("quiet")) {
       std::cout << tildeu << "\t" << tildev << "\t" << hatu << "\t" << hatv << "\t";
     } else {
