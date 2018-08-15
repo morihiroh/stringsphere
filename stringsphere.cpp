@@ -83,7 +83,7 @@ int main(int argc, char **argv)
   if (argmap.count("searchall")) {
     int u, v;
     auto searchallfunc = [&](auto dist) {
-        searchall(u, v, k, center, radius, dist, alpha);
+        searchall(u, v, k, center, radius, dist);
     };
 
     swfunc(distancetype, searchallfunc);

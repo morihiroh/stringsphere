@@ -288,9 +288,7 @@ void searchall(int& u, int& v, // estimated values
     const int k,  // the size of alphabet
     const std::vector<int>& center, // center string
     const int radius, // radius
-    DistanceTag, // distance function
-    const double alpha, // quantile of gaussian distribution
-    const int nmax = INT_MAX  // max # randomly generated strings
+    DistanceTag // distance function
     ) {
   std::vector<int> sn(center.size() + radius);
   int xn = 0;
