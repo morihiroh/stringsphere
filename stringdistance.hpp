@@ -279,7 +279,7 @@ void count(int& tildeu, int& tildev, // estimated values
     prevn = vn;
   }
   if (bu > 0 or bv > 0 or uflag or vflag) {
-    std::cerr << "# iterations reached max\n";
+    std::cerr << "# iterations reached max (k=" << k << ", c=" << center.size() << ", r=" << radius << ")\n";
   }
 }
 
