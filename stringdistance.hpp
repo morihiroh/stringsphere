@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <cmath>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/multi_array.hpp>
 
@@ -178,8 +179,136 @@ static void print(const std::vector<int>& s) {
 }
 #endif
 
+typedef unsigned long long int CountType;
+typedef double FloatType;
+
 template <typename DistanceTag>
-void count(int& tildeu, int& tildev, // estimated values
+void estimate_strong(
+    const int k,  // the size of alphabet
+    const std::vector<int>& center, // center string
+    const int radius, // radius
+    DistanceTag, // distance function
+    const double alpha, // quantile of gaussian distribution
+    const CountType lowerbound, // N: the lower bound of # randomly generated strings
+    const CountType iterations, // B: convergence test
+    const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
+    ) {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+
+  std::uniform_int_distribution<int> agen(0, k-1);
+
+  boost::math::normal gauss(0.0, 1.0);
+
+  CountType s = center.size();
+  std::vector<int> sn(center.size() + radius);
+  std::vector<CountType> ur(radius+1);
+
+  CountType biter = iterations;
+  for (CountType i = 2; i <= center.size(); i++) {
+    biter *= i;
+  }
+  ur[0] = 1;
+  for (int r = 1; r <= radius; r++) {
+    int c = s - r;
+    if (c < 0) c = 0;
+    CountType urlsum = 0;
+    CountType kl = 1;
+    for (int i = 0; i < c; i++) {
+      kl *= k;
+    }
+    for (int l = c; l <= s + r; l++, kl *= k) {
+      sn.resize(l);
+      CountType x = 0;
+      CountType b = 0;
+      CountType prevurln = 0;
+      for (CountType n = 1; n < nmax; n++) {
+        for (int i = 0; i < l; i++) {
+          sn[i] = agen(mt);
+        }
+        auto d = measure(center, sn, DistanceTag());
+        if (within(d, r, typename DistanceTag::CompareType())) {
+          x++;
+        }
+        CountType urln = (CountType) (0.5 + kl * ((FloatType)x / (FloatType)n));
+        if (urln == prevurln) {
+          b++;
+          if (b > biter) {
+            urlsum += urln;
+            break;
+          }
+        } else {
+          b = 0;
+          prevurln = urln;
+        }
+      }
+    }
+    ur[r] = urlsum;
+    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum << "\t" << urlsum - ur[r-1] << "\n";
+  }
+}
+
+template <typename DistanceTag>
+void estimate_confidence(
+    const int k,  // the size of alphabet
+    const std::vector<int>& center, // center string
+    const int radius, // radius
+    DistanceTag, // distance function
+    const double alpha, // quantile of gaussian distribution
+    const CountType lowerbound, // N: the lower bound of # randomly generated strings
+    const CountType iterations, // B: convergence test
+    const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
+    ) {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+
+  std::uniform_int_distribution<int> agen(0, k-1);
+
+  boost::math::normal gauss(0.0, 1.0);
+  FloatType z = quantile(gauss, 1.0 - alpha * 0.5);
+  FloatType z2 = z * z; // z^2
+  FloatType z24 = z2 * 4; // 4z^2
+  FloatType z4 = z2 * z2; // z^4
+
+  CountType s = center.size();
+  std::vector<int> sn(center.size() + radius);
+  std::vector<CountType> ur(radius+1);
+  ur[0] = 1;
+  for (int r = 1; r <= radius; r++) {
+    int c = s - r;
+    if (c < 0) c = 0;
+    CountType urlsum = 0;
+    CountType kl = 1;
+    for (int i = 0; i < c; i++) {
+      kl *= k;
+    }
+    for (int l = c; l <= s + r; l++, kl *= k) {
+      sn.resize(l);
+      CountType x = 0;
+      for (CountType n = 1; n < nmax; n++) {
+        for (int i = 0; i < l; i++) {
+          sn[i] = agen(mt);
+        }
+        auto d = measure(center, sn, DistanceTag());
+        if (within(d, r, typename DistanceTag::CompareType())) {
+          x++;
+        }
+        FloatType xn = (FloatType)x / (FloatType)n;
+        CountType urln = (CountType) (0.5 + kl * xn);
+        CountType e = sqrt(z24 * x * (1.0 - xn) + z4) * kl - z2;
+        if (n > lowerbound and n > e) {
+          urlsum += urln;
+          break;
+        }
+      }
+    }
+    ur[r] = urlsum;
+    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum << "\t" << urlsum - ur[r-1] << "\n";
+  }
+}
+
+template <typename DistanceTag>
+void count_v1(int& tildeu, int& tildev, // estimated values
     int& hatu, int& hatv, // strong eastimated values
     const int k,  // the size of alphabet
     const std::vector<int>& center, // center string
@@ -284,15 +413,15 @@ void count(int& tildeu, int& tildev, // estimated values
 }
 
 template <typename DistanceTag>
-void searchall(int& u, int& v, // estimated values
+void searchall(CountType& u, CountType& v, // estimated values
     const int k,  // the size of alphabet
     const std::vector<int>& center, // center string
     const int radius, // radius
     DistanceTag // distance function
     ) {
   std::vector<int> sn(center.size() + radius);
-  int xn = 0;
-  int yn = 0;
+  CountType xn = 0;
+  CountType yn = 0;
   int lstart = center.size() - radius;
   int lend = center.size() + radius;
   if (lstart < 0) {

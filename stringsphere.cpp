@@ -30,6 +30,7 @@ int main(int argc, char **argv)
 " 4: Jaro-Winkler"
 #endif
 )
+    ("method,m", po::value<int>()->default_value(0), ": 0: strong consistent estimate 1: confidence interval estimate")
     ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
     ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
     ("center,c", po::value<std::string>()->default_value("0,0,0"), ": center string in integers from 0 to k-1 with comma delimiter")
@@ -51,12 +52,13 @@ int main(int argc, char **argv)
   }
 
   int distancetype = argmap["distance"].as<int>();
+  int method = argmap["method"].as<int>();
   double alpha = argmap["alpha"].as<double>();
   int k = argmap["k"].as<int>();
   auto center = parsestring(argmap["center"].as<std::string>());
   int radius = argmap["radius"].as<int>();
-  int lowerbound = argmap["lowerbound"].as<int>();
-  int iterations = argmap["iterations"].as<int>();
+  CountType lowerbound = argmap["lowerbound"].as<int>();
+  CountType iterations = argmap["iterations"].as<int>();
 
   auto swfunc = [](int distancetype, auto func) {
     switch (distancetype) {
@@ -81,7 +83,7 @@ int main(int argc, char **argv)
   };
 
   if (argmap.count("searchall")) {
-    int u, v;
+    CountType u, v;
     auto searchallfunc = [&](auto dist) {
         searchall(u, v, k, center, radius, dist);
     };
@@ -94,18 +96,15 @@ int main(int argc, char **argv)
       std::cout << "u = " << u << "\tv = " << v << "\n";
     }
   } else {
-    int tildeu, tildev, hatu, hatv;
     auto countfunc = [&](auto dist) {
-      count(tildeu, tildev, hatu, hatv, k, center, radius, dist, alpha, lowerbound, iterations);
+      if (method == 0) {
+        estimate_strong(k, center, radius, dist, alpha, lowerbound, iterations);
+      } else {
+        estimate_confidence(k, center, radius, dist, alpha, lowerbound, iterations);
+      }
     };
 
     swfunc(distancetype, countfunc);
-
-    if (argmap.count("quiet")) {
-      std::cout << tildeu << "\t" << tildev << "\t" << hatu << "\t" << hatv << "\t";
-    } else {
-      std::cout << "~u = " << tildeu << "\t~v = " << tildev << "\t ^u = " << hatu << "\t ^v = " << hatv << "\n";
-    }
   }
 
   return EXIT_SUCCESS;
