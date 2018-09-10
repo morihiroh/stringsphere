@@ -189,7 +189,6 @@ void estimate_strong(
     const int radius, // radius
     DistanceTag, // distance function
     const double alpha, // quantile of gaussian distribution
-    const CountType lowerbound, // N: the lower bound of # randomly generated strings
     const CountType iterations, // B: convergence test
     const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
     ) {
@@ -217,13 +216,13 @@ void estimate_strong(
     for (int i = 0; i < c; i++) {
       kl *= k;
     }
-    for (int l = c; l <= s + r; l++, kl *= k) {
+    for (CountType l = c; l <= s + r; l++, kl *= k) {
       sn.resize(l);
       CountType x = 0;
       CountType b = 0;
       CountType prevurln = 0;
       for (CountType n = 1; n < nmax; n++) {
-        for (int i = 0; i < l; i++) {
+        for (CountType i = 0; i < l; i++) {
           sn[i] = agen(mt);
         }
         auto d = measure(center, sn, DistanceTag());
@@ -256,7 +255,6 @@ void estimate_confidence(
     DistanceTag, // distance function
     const double alpha, // quantile of gaussian distribution
     const CountType lowerbound, // N: the lower bound of # randomly generated strings
-    const CountType iterations, // B: convergence test
     const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
     ) {
   std::random_device rd;
@@ -282,11 +280,11 @@ void estimate_confidence(
     for (int i = 0; i < c; i++) {
       kl *= k;
     }
-    for (int l = c; l <= s + r; l++, kl *= k) {
+    for (CountType l = c; l <= s + r; l++, kl *= k) {
       sn.resize(l);
       CountType x = 0;
       for (CountType n = 1; n < nmax; n++) {
-        for (int i = 0; i < l; i++) {
+        for (CountType i = 0; i < l; i++) {
           sn[i] = agen(mt);
         }
         auto d = measure(center, sn, DistanceTag());
@@ -343,8 +341,6 @@ void count_v1(int& tildeu, int& tildev, // estimated values
   double z24 = z2 * 4; // 4z^2
   double z4 = z2 * z2; // z^4
 
-  //print(center);
-
   double xn = 0;
   double yn = 0;
   bool uflag = true;
@@ -360,9 +356,7 @@ void count_v1(int& tildeu, int& tildev, // estimated values
     for (int i = 0; i < l; i++) {
       sn[i] = agen(mt);
     }
-    //print(sn);
     auto d = measure(center, sn, DistanceTag());
-    //std::cout << "d: " << d << "\n";
     if (within(d, radius, typename DistanceTag::CompareType())) {
       xn++;
       if (d == radius) {
@@ -413,7 +407,7 @@ void count_v1(int& tildeu, int& tildev, // estimated values
 }
 
 template <typename DistanceTag>
-void searchall(CountType& u, CountType& v, // estimated values
+void searchall(
     const int k,  // the size of alphabet
     const std::vector<int>& center, // center string
     const int radius, // radius
@@ -434,9 +428,7 @@ void searchall(CountType& u, CountType& v, // estimated values
     }
     bool cf = true;
     while (cf) {
-      //print(sn);
       int d = measure(center, sn, DistanceTag());
-      //std::cout << "d: " << d << "\n";
       if (within(d, radius, typename DistanceTag::CompareType())) {
         xn++;
         if (d == radius) {
@@ -456,7 +448,6 @@ void searchall(CountType& u, CountType& v, // estimated values
     }
   }
 
-  u = xn;
-  v = yn;
+  std::cout << k << "\t" << center.size() << "\t" << radius << "\t" << xn << "\t" << yn << "\n";
 }
 

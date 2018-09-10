@@ -30,14 +30,14 @@ int main(int argc, char **argv)
 " 4: Jaro-Winkler"
 #endif
 )
-    ("method,m", po::value<int>()->default_value(0), ": 0: strong consistent estimate 1: confidence interval estimate")
-    ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
     ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
-    ("center,c", po::value<std::string>()->default_value("0,0,0"), ": center string in integers from 0 to k-1 with comma delimiter")
+    ("string,s", po::value<int>()->default_value(3), ": the length of center string")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
-    ("lowerbound,l", po::value<int>()->default_value(10000), ": the lower bound of # randomly generated strings")
-    ("iterations,i", po::value<int>()->default_value(100), ": # of iterations that estimated values are equal (convergence test).")
-    ("searchall,s", ": search all instead of the stochastic method")
+    ("method,m", po::value<int>()->default_value(0), ": 0: strong consistent estimate 1: confidence interval estimate")
+    ("iterations,i", po::value<int>()->default_value(100), ": # of iterations (B) that estimated values are equal (convergence test).")
+    ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
+    ("lowerbound,l", po::value<int>()->default_value(10000), ": the lower bound (N) of # randomly generated strings")
+    ("exhaustive,e", ": search all instead of the stochastic method")
     ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   int method = argmap["method"].as<int>();
   double alpha = argmap["alpha"].as<double>();
   int k = argmap["k"].as<int>();
-  auto center = parsestring(argmap["center"].as<std::string>());
+  std::vector<int> center(argmap["string"].as<int>(), 0);
   int radius = argmap["radius"].as<int>();
   CountType lowerbound = argmap["lowerbound"].as<int>();
   CountType iterations = argmap["iterations"].as<int>();
@@ -82,30 +82,20 @@ int main(int argc, char **argv)
     }
   };
 
-  if (argmap.count("searchall")) {
-    CountType u, v;
-    auto searchallfunc = [&](auto dist) {
-        searchall(u, v, k, center, radius, dist);
-    };
-
-    swfunc(distancetype, searchallfunc);
-
-    if (argmap.count("quiet")) {
-      std::cout << u << '\t' << v << '\t';
-    } else {
-      std::cout << "u = " << u << "\tv = " << v << "\n";
+  auto countfunc = [&](auto dist) {
+    if (argmap.count("exhaustive")) {
+      searchall(k, center, radius, dist);
+    } else if (method == 0) {
+      estimate_strong(k, center, radius, dist, alpha, iterations);
+    } else if (method == 1) {
+      estimate_confidence(k, center, radius, dist, alpha, lowerbound);
     }
-  } else {
-    auto countfunc = [&](auto dist) {
-      if (method == 0) {
-        estimate_strong(k, center, radius, dist, alpha, lowerbound, iterations);
-      } else {
-        estimate_confidence(k, center, radius, dist, alpha, lowerbound, iterations);
-      }
-    };
+  };
 
-    swfunc(distancetype, countfunc);
+  if (not argmap.count("quiet")) {
+    std::cout << "k\ts\tr\tu\tv\n";
   }
+  swfunc(distancetype, countfunc);
 
   return EXIT_SUCCESS;
 }
