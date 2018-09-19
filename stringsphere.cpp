@@ -95,7 +95,11 @@ int main(int argc, char **argv)
   if (not argmap.count("quiet")) {
     std::cout << "k\ts\tr\tu\tv\n";
   }
-  swfunc(distancetype, countfunc);
+  if (radius == 0) {
+    std::cout << k << "\t" << center.size() << "\t" << 0 << "\t" << 1 << "\t" << 1 << "\n";
+  } else {
+    swfunc(distancetype, countfunc);
+  }
 
   return EXIT_SUCCESS;
 }
