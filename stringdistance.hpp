@@ -203,10 +203,6 @@ void estimate_strong(
   std::vector<int> sn(center.size() + radius);
   std::vector<CountType> ur(radius+1);
 
-  CountType biter = iterations;
-  for (CountType i = 2; i <= center.size(); i++) {
-    biter *= i;
-  }
   ur[0] = 1;
   for (int r = 1; r <= radius; r++) {
     int c = s - r;
@@ -232,7 +228,7 @@ void estimate_strong(
         CountType urln = (CountType) (0.5 + kl * ((FloatType)x / (FloatType)n));
         if (urln == prevurln) {
           b++;
-          if (b > biter) {
+          if (b > iterations) {
             urlsum += urln;
             break;
           }
