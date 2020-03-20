@@ -170,15 +170,6 @@ double operator()(const std::vector<int>& x, const std::vector<int>& y, JaroWink
 }
 #endif
 
-#if 0
-static void print(const std::vector<int>& s) {
-  for (auto c : s) {
-    std::cout << c;
-  }
-  std::cout << "\n";
-}
-#endif
-
 typedef unsigned long long int CountType;
 typedef double FloatType;
 
@@ -308,107 +299,6 @@ void estimate_confidence(
       std::cout << "\t" << urlsum - ur[r-1];
     }
     std::cout << "\n";
-  }
-}
-
-template <typename DistanceTag>
-void count_v1(int& tildeu, int& tildev, // estimated values
-    int& hatu, int& hatv, // strong eastimated values
-    const int k,  // the size of alphabet
-    const std::vector<int>& center, // center string
-    const int radius, // radius
-    DistanceTag, // distance function
-    const double alpha, // quantile of gaussian distribution
-    const int lowerbound, // the lower bound of # randomly generated strings
-    const int iterations, // convergence test
-    const int nmax = INT_MAX  // max # randomly generated strings
-    ) {
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  int lstart = center.size() - radius;
-  int lend = center.size() + radius;
-
-  double kmc; // sum i=0~(|s|+r) k^i - c
-  if (lstart >= 1) {
-    kmc = std::pow(k, lstart) * (std::pow(k, 2 * radius + 1) - 1) / (k - 1); // k^(|s|-r)*(k^(2r+1)-1)/(k-1)
-  } else {
-    kmc = (std::pow(k, lend + 1) - 1) / (k - 1); // (k^(|s|+r+1)-1)/(k-1)
-  }
-
-  if (lstart < 0) {
-    lstart = 0;
-  }
-  std::uniform_int_distribution<int> lgen(lstart, lend);
-  std::uniform_int_distribution<int> agen(0, k-1);
-
-  boost::math::normal gauss(0.0, 1.0);
-  double z = quantile(gauss, 1.0 - alpha * 0.5);
-  double z2 = z * z; // z^2
-  double z24 = z2 * 4; // 4z^2
-  double z4 = z2 * z2; // z^4
-
-  double xn = 0;
-  double yn = 0;
-  bool uflag = true;
-  bool vflag = true;
-  int bu = iterations;
-  int bv = iterations;
-  int preun = INT_MAX;
-  int prevn = INT_MAX;
-  std::vector<int> sn(center.size() + radius);
-  for (int n = 1; (bu > 0 or bv > 0 or uflag or vflag) and n < nmax; n++) {
-    int l = lgen(mt);
-    sn.resize(l);
-    for (int i = 0; i < l; i++) {
-      sn[i] = agen(mt);
-    }
-    auto d = measure(center, sn, DistanceTag());
-    if (within(d, radius, typename DistanceTag::CompareType())) {
-      xn++;
-      if (d == radius) {
-        yn++;
-      }
-    }
-    double tmp = kmc / n;
-    int un = (int)(0.5 + tmp * xn);
-    int vn = (int)(0.5 + tmp * yn);
-    if (uflag) {
-      if ((n > lowerbound) and (n > kmc * sqrt(z24 * xn * (1.0 - xn/n) + z4) - z2)) {
-        tildeu = un;
-        uflag = false;
-      }
-    }
-    if (vflag) {
-      if ((n > lowerbound) and (n > kmc * sqrt(z24 * yn * (1.0 - yn/n) + z4) - z2)) {
-        tildev = vn;
-        vflag = false;
-      }
-    }
-    if (bu > 0) {
-      if (un == preun) {
-        bu--;
-        if (bu == 0) {
-          hatu = un;
-        }
-      } else {
-        bu = iterations;
-      }
-    }
-    if (bv > 0) {
-      if (vn == prevn) {
-        bv--;
-        if (bv == 0) {
-          hatv = vn;
-        }
-      } else {
-        bv = iterations;
-      }
-    }
-    preun = un;
-    prevn = vn;
-  }
-  if (bu > 0 or bv > 0 or uflag or vflag) {
-    std::cerr << "# iterations reached max (k=" << k << ", c=" << center.size() << ", r=" << radius << ")\n";
   }
 }
 
