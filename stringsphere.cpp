@@ -38,6 +38,7 @@ int main(int argc, char **argv)
     ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
     ("lowerbound,l", po::value<int>()->default_value(10000), ": the lower bound (N) of # randomly generated strings")
     ("exhaustive,e", ": search all instead of the stochastic method")
+    ("onlyu,u", ": find only u")
     ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
 
@@ -59,6 +60,7 @@ int main(int argc, char **argv)
   int radius = argmap["radius"].as<int>();
   CountType lowerbound = argmap["lowerbound"].as<int>();
   CountType iterations = argmap["iterations"].as<int>();
+  bool is_only_u = argmap.count("onlyu");
 
   auto swfunc = [](int distancetype, auto func) {
     switch (distancetype) {
@@ -86,9 +88,9 @@ int main(int argc, char **argv)
     if (argmap.count("exhaustive")) {
       searchall(k, center, radius, dist);
     } else if (method == 0) {
-      estimate_strong(k, center, radius, dist, alpha, iterations);
+      estimate_strong(k, center, radius, dist, alpha, iterations, is_only_u);
     } else if (method == 1) {
-      estimate_confidence(k, center, radius, dist, alpha, lowerbound);
+      estimate_confidence(k, center, radius, dist, alpha, lowerbound, is_only_u);
     }
   };
 

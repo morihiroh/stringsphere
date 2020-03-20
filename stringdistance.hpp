@@ -190,6 +190,7 @@ void estimate_strong(
     DistanceTag, // distance function
     const double alpha, // quantile of gaussian distribution
     const CountType iterations, // B: convergence test
+    const bool is_only_u,
     const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
     ) {
   std::random_device rd;
@@ -204,7 +205,7 @@ void estimate_strong(
   std::vector<CountType> ur(radius+1);
 
   ur[0] = 1;
-  for (int r = 1; r <= radius; r++) {
+  for (int r = is_only_u ? radius : 1; r <= radius; r++) {
     int c = s - r;
     if (c < 0) c = 0;
     CountType urlsum = 0;
@@ -238,8 +239,12 @@ void estimate_strong(
         }
       }
     }
-    ur[r] = urlsum;
-    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum << "\t" << urlsum - ur[r-1] << "\n";
+    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum;
+    if (not is_only_u) {
+      ur[r] = urlsum;
+      std::cout << "\t" << urlsum - ur[r-1];
+    }
+    std::cout << "\n";
   }
 }
 
@@ -251,6 +256,7 @@ void estimate_confidence(
     DistanceTag, // distance function
     const double alpha, // quantile of gaussian distribution
     const CountType lowerbound, // N: the lower bound of # randomly generated strings
+    const bool is_only_u,
     const CountType nmax = std::numeric_limits<CountType>::max() // max # randomly generated strings
     ) {
   std::random_device rd;
@@ -268,7 +274,7 @@ void estimate_confidence(
   std::vector<int> sn(center.size() + radius);
   std::vector<CountType> ur(radius+1);
   ur[0] = 1;
-  for (int r = 1; r <= radius; r++) {
+  for (int r = is_only_u ? radius : 1; r <= radius; r++) {
     int c = s - r;
     if (c < 0) c = 0;
     CountType urlsum = 0;
@@ -296,8 +302,12 @@ void estimate_confidence(
         }
       }
     }
-    ur[r] = urlsum;
-    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum << "\t" << urlsum - ur[r-1] << "\n";
+    std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum;
+    if (not is_only_u) {
+      ur[r] = urlsum;
+      std::cout << "\t" << urlsum - ur[r-1];
+    }
+    std::cout << "\n";
   }
 }
 
