@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "stringdistance.hpp"
+#include "stringspheresearch.hpp"
 #include <typeinfo>
 
 std::vector<int> parsestring(const std::string& s)
@@ -25,20 +26,13 @@ int main(int argc, char **argv)
   po::options_description opt("Allowed options");
 
   opt.add_options()
-    ("distance,d", po::value<int>()->default_value(2), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein"
-#ifndef DISABLE_JAROWINKLER
-" 4: Jaro-Winkler"
-#endif
-)
+    ("distance,d", po::value<int>()->default_value(2), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein")
     ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
     ("string,s", po::value<int>()->default_value(3), ": the length of center string")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
-    ("method,m", po::value<int>()->default_value(0), ": 0: strong consistent estimate 1: confidence interval estimate")
-    ("iterations,i", po::value<int>()->default_value(100), ": # of iterations (B) that estimated values are equal (convergence test).")
-    ("alpha,a", po::value<double>()->default_value(0.01), ": 100xalpha/2 percent point of gaussian")
-    ("lowerbound,l", po::value<int>()->default_value(10000), ": the lower bound (N) of # randomly generated strings")
-    ("exhaustive,e", ": search all instead of the stochastic method")
-    ("onlyu,u", ": find only u")
+    ("method,m", po::value<int>()->default_value(0), ": 0: random selection method 1: exhaustive search method")
+    ("iterations,i", po::value<int>()->default_value(1), ": least # of iterations")
+    ("onlyu,u", ": estimate only u of the radius")
     ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
 
@@ -46,21 +40,20 @@ int main(int argc, char **argv)
   po::store(po::parse_command_line(argc, argv, opt), argmap);
   po::notify(argmap);
 
-  if (argmap.count("help")) {
+  if (argmap.count("help")) { 
     cerr << "Usage: " << argv[0] << " [option]" << endl << opt << endl;
 
     return EXIT_FAILURE;
   }
 
-  int distancetype = argmap["distance"].as<int>();
   int method = argmap["method"].as<int>();
-  double alpha = argmap["alpha"].as<double>();
+  int distancetype = argmap["distance"].as<int>();
   int k = argmap["k"].as<int>();
   std::vector<int> center(argmap["string"].as<int>(), 0);
   int radius = argmap["radius"].as<int>();
-  CountType lowerbound = argmap["lowerbound"].as<int>();
   CountType iterations = argmap["iterations"].as<int>();
-  bool is_only_u = argmap.count("onlyu");
+  bool is_only_u = (method == 0) and argmap.count("onlyu");
+  bool is_quiet = argmap.count("quiet");
 
   auto swfunc = [](int distancetype, auto func) {
     switch (distancetype) {
@@ -76,32 +69,52 @@ int main(int argc, char **argv)
       case 3:
         func(DamerauLevenshteinDistance());
         break;
-#ifndef DISABLE_JAROWINKLER
-      case 4:
-        func(JaroWinklerDistance());
-        break;
-#endif
     }
   };
 
   auto countfunc = [&](auto dist) {
-    if (argmap.count("exhaustive")) {
-      searchall(k, center, radius, dist);
-    } else if (method == 0) {
-      estimate_strong(k, center, radius, dist, alpha, iterations, is_only_u);
-    } else if (method == 1) {
-      estimate_confidence(k, center, radius, dist, alpha, lowerbound, is_only_u);
-    }
+    switch (method) {
+      case 0:
+        estimate(k, center, radius, dist, iterations, is_only_u);
+        break;
+      case 1:
+        searchall(k, center, radius, dist);
+        break;
+    } 
   };
 
-  if (not argmap.count("quiet")) {
-    std::cout << "k\ts\tr\tu\tv\n";
+  if (not is_quiet) {
+    switch (method) {
+      case 0:
+        std::cout << "Random selection method";
+        break;
+      case 1:
+        std::cout << "Exhaustive search method";
+        break;
+    }
+    std::cout << " with ";
+    switch (distancetype) {
+      case 0:
+        std::cout << "extended Hamming distance\n";
+        break;
+      case 1:
+        std::cout << "longest common subsequence\n";
+        break;
+      case 2:
+        std::cout << "Levenshtein distance\n";
+        break;
+      case 3:
+        std::cout << "Damerau-Levenshtein distance\n";
+        break;
+    }
+    std::cout << "k\ts\tr\tu";
+    if (not is_only_u) {
+      std::cout << "\tv";
+    }
+    std::cout << "\n";
   }
-  if (radius == 0) {
-    std::cout << k << "\t" << center.size() << "\t" << 0 << "\t" << 1 << "\t" << 1 << "\n";
-  } else {
-    swfunc(distancetype, countfunc);
-  }
+
+  swfunc(distancetype, countfunc);
 
   return EXIT_SUCCESS;
 }
