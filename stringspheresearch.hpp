@@ -14,6 +14,7 @@ void estimate(
     const int radius, // radius
     DistanceTag, // distance function
     const CountType iterations, // least # iterations 
+    const int lomit, // omit smaller l
     const bool is_only_u // estimate only u
     ) {
 
@@ -34,7 +35,7 @@ void estimate(
     return;
   }
 
-  CountType s = center.size();
+  int s = center.size();
 
   if (radius == 0 or not is_only_u) {
     std::cout << k << "\t" << s << "\t0\t1";
@@ -52,12 +53,17 @@ void estimate(
     for (int r = is_only_u ? radius : 1; r <= radius; r++) {
       int c = s - r;
       if (c < 0) c = 0;
+      if (lomit >= 0) {
+        if (c < s + r - lomit) {
+          c = s + r - lomit;
+        }
+      }
       CountType urlsum = 0;
       CountType kl = 1;
       for (int i = 0; i < c; i++) {
         kl *= k;
       }
-      for (CountType l = c; l <= s + r; l++, kl *= k) {
+      for (int l = c; l <= s + r; l++, kl *= k) {
         sn.resize(l);
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
@@ -65,7 +71,7 @@ void estimate(
         for (CountType n = 1; n <= kl; n++) {
           rnd = (rnd * random_A + random_B) % kl;
           CountType tmp = rnd;
-          for (CountType i = 0; i < l; i++) {
+          for (int i = 0; i < l; i++) {
             sn[i] = tmp % k;
             tmp /= k;
           }
@@ -77,7 +83,7 @@ void estimate(
           FloatType p = (FloatType)x/(FloatType)n;
           FloatType t = fkl - 1.0/(400.0*p*(1-p)*fkl/(fkl - 1) + 1.0/fkl);
           if (x > 0 and n >= least_iterations and n >= t) {
-            //std::cout << (p*fkl) << "\t" << x << "\t" << n << "\t" << kl << "\n";
+            //std::cout << "l=" << l << "\tx=" << x << "\tu=" << p*fkl << "\tp=" << p << "\t" << (FloatType)n/(FloatType)kl << "\tn=" << n << "\tkl=" << kl << "\n";
             urlsum += (CountType)(0.5 + p * fkl);
             break;
           }
