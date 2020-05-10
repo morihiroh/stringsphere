@@ -4,6 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
+#include <chrono>
 #include "stringdistance.hpp"
 #include "stringspheresearch.hpp"
 
@@ -33,6 +34,7 @@ int main(int argc, char **argv)
     ("iterations,i", po::value<int>()->default_value(10), ": least # of iterations")
     ("lomit,l", po::value<int>()->default_value(-1), ": omit smaller l (-1: no omit)")
     ("onlyu,u", ": estimate only u of the radius")
+    ("elapsed,e", ": print the elapsed time in milliseconds")
     ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
 
@@ -115,7 +117,15 @@ int main(int argc, char **argv)
     std::cout << "\n";
   }
 
+  auto start = std::chrono::system_clock::now();
+
   swfunc(distancetype, countfunc);
+  
+  if (argmap.count("elapsed")) {
+    auto end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::cout << elapsed << "\n";
+  }
 
   return EXIT_SUCCESS;
 }
