@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 #include "stringdistance.hpp"
 
 typedef unsigned long long int CountType;
@@ -68,24 +69,31 @@ void estimate(
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
         CountType rnd = std::time(nullptr) % kl;
+        FloatType fkl = kl;
+        FloatType coeff = 400.0 * fkl * (1-1/fkl);
+        bool flag = false;
         for (CountType n = 1; n <= kl; n++) {
           rnd = (rnd * random_A + random_B) % kl;
-          CountType tmp = rnd;
+          std::lldiv_t tmp;
+          tmp.quot = rnd;
           for (int i = 0; i < l; i++) {
-            sn[i] = tmp % k;
-            tmp /= k;
+            tmp = std::lldiv(tmp.quot, k);
+            sn[i] = tmp.rem;
           }
           auto d = measure(center, sn, DistanceTag());
           if (within(d, r, typename DistanceTag::CompareType())) {
             x++;
           }
-          FloatType fkl = kl;
-          FloatType p = (FloatType)x/(FloatType)n;
-          FloatType t = fkl - 1.0/(400.0*p*(1-p)*fkl/(fkl - 1) + 1.0/fkl);
-          if (x > 0 and n >= least_iterations and n >= t) {
-            //std::cout << "l=" << l << "\tx=" << x << "\tu=" << p*fkl << "\tp=" << p << "\t" << (FloatType)n/(FloatType)kl << "\tn=" << n << "\tkl=" << kl << "\n";
-            urlsum += (CountType)(0.5 + p * fkl);
-            break;
+          if (flag) {
+            FloatType fn = n;
+            FloatType p = (FloatType)x/fn;
+            if (fn >= coeff * p * (1-p) * (fkl - fn)) {
+              //std::cout << "l=" << l << "\tx=" << x << "\tu=" << p*fkl << "\tp=" << p << "\t" << (FloatType)n/(FloatType)kl << "\tn=" << n << "\tkl=" << kl << "\n";
+              urlsum += (CountType)(0.5 + p * fkl);
+              break;
+            }
+          } else if (n >= least_iterations and x > 0) {
+            flag = true;
           }
         }
       }
