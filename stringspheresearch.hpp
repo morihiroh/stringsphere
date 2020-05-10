@@ -71,7 +71,6 @@ void estimate(
         CountType rnd = std::time(nullptr) % kl;
         FloatType fkl = kl;
         FloatType coeff = 400.0 * fkl * (1-1/fkl);
-        bool flag = false;
         for (CountType n = 1; n <= kl; n++) {
           rnd = (rnd * random_A + random_B) % kl;
           std::lldiv_t tmp;
@@ -84,7 +83,7 @@ void estimate(
           if (within(d, r, typename DistanceTag::CompareType())) {
             x++;
           }
-          if (flag) {
+          if (n >= least_iterations and x > 0) {
             FloatType fn = n;
             FloatType p = (FloatType)x/fn;
             if (fn >= coeff * p * (1-p) * (fkl - fn)) {
@@ -92,8 +91,6 @@ void estimate(
               urlsum += (CountType)(0.5 + p * fkl);
               break;
             }
-          } else if (n >= least_iterations and x > 0) {
-            flag = true;
           }
         }
       }
