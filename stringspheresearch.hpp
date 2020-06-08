@@ -15,7 +15,7 @@ void estimate(
     const int radius, // radius
     DistanceTag, // distance function
     const CountType iterations, // least # iterations 
-    const int lomit, // omit smaller l
+    const int ell, // specify ell (-1: all)
     const bool is_only_u // estimate only u
     ) {
 
@@ -54,17 +54,17 @@ void estimate(
     for (int r = is_only_u ? radius : 1; r <= radius; r++) {
       int c = s - r;
       if (c < 0) c = 0;
-      if (lomit >= 0) {
-        if (c < s + r - lomit) {
-          c = s + r - lomit;
-        }
+      int lmax = s + r;
+      if (ell >= 0) {
+        c = ell;
+        lmax = ell;
       }
       CountType urlsum = 0;
       CountType kl = 1;
       for (int i = 0; i < c; i++) {
         kl *= k;
       }
-      for (int l = c; l <= s + r; l++, kl *= k) {
+      for (int l = c; l <= lmax; l++, kl *= k) {
         sn.resize(l);
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
@@ -95,6 +95,9 @@ void estimate(
         }
       }
       std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum;
+      if (ell >= 0) {
+        std::cout << "\t(ell=" << ell << ")";
+      }
       if (not is_only_u) {
         ur[r] = urlsum;
         std::cout << "\t" << urlsum - ur[r-1];

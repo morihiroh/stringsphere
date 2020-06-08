@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     ("radius,r", po::value<int>()->default_value(2), ": radius")
     ("method,m", po::value<int>()->default_value(0), ": 0: random selection method 1: exhaustive search method")
     ("iterations,i", po::value<int>()->default_value(10), ": least # of iterations")
-    ("lomit,l", po::value<int>()->default_value(-1), ": omit smaller l (-1: no omit)")
+    ("ell,l", po::value<int>()->default_value(-1), ": specify ell (max{s-r,0}<=ell<=s+r) (-1: all)")
     ("onlyu,u", ": estimate only u of the radius")
     ("elapsed,e", ": print the elapsed time in milliseconds")
     ("quiet,q", ": display only results")
@@ -54,8 +54,8 @@ int main(int argc, char **argv)
   std::vector<int> center(argmap["string"].as<int>(), 0);
   int radius = argmap["radius"].as<int>();
   CountType iterations = argmap["iterations"].as<int>();
-  int lomit = argmap["lomit"].as<int>();
-  bool is_only_u = (method == 0) and argmap.count("onlyu");
+  int ell = argmap["ell"].as<int>();
+  bool is_only_u = (method == 0) and (argmap.count("onlyu") or (ell >= 0));
   bool is_quiet = argmap.count("quiet");
 
   auto swfunc = [](int distancetype, auto func) {
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
   auto countfunc = [&](auto dist) {
     switch (method) {
       case 0:
-        estimate(k, center, radius, dist, iterations, lomit, is_only_u);
+        estimate(k, center, radius, dist, iterations, ell, is_only_u);
         break;
       case 1:
         searchall(k, center, radius, dist);
