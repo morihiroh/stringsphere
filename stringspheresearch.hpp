@@ -15,6 +15,7 @@ void estimate(
     const int radius, // radius
     DistanceTag, // distance function
     const CountType iterations, // least # iterations 
+    const CountType maxiter, // max # iterations 
     const int ell, // specify ell (-1: all)
     const bool is_only_u // estimate only u
     ) {
@@ -50,6 +51,7 @@ void estimate(
     std::vector<int> sn(center.size() + radius);
     std::vector<CountType> ur(radius + 1);
 
+    CountType numiter = 0;
     ur[0] = 1;
     for (int r = is_only_u ? radius : 1; r <= radius; r++) {
       int c = s - r;
@@ -64,7 +66,8 @@ void estimate(
       for (int i = 0; i < c; i++) {
         kl *= k;
       }
-      for (int l = c; l <= lmax; l++, kl *= k) {
+      bool iterflag = true;
+      for (int l = c; iterflag and l <= lmax; l++, kl *= k) {
         sn.resize(l);
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
@@ -83,7 +86,13 @@ void estimate(
           if (within(d, r, typename DistanceTag::CompareType())) {
             x++;
           }
-          if (n >= least_iterations and x > 0) {
+          numiter++;
+          if (maxiter > 0 and numiter > maxiter) {
+            iterflag = false;
+            FloatType p = (FloatType)x/(FloatType)n;
+            urlsum += (CountType)(0.5 + p * fkl);
+            break;
+          } else if (n >= least_iterations and x > 0) {
             FloatType fn = n;
             FloatType p = (FloatType)x/fn;
             if (fn >= coeff * p * (1-p) * (fkl - fn)) {

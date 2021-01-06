@@ -31,7 +31,8 @@ int main(int argc, char **argv)
     ("string,s", po::value<int>()->default_value(3), ": the length of center string")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
     ("method,m", po::value<int>()->default_value(0), ": 0: random selection method 1: exhaustive search method")
-    ("iterations,i", po::value<int>()->default_value(10), ": least # of iterations")
+    ("iterations,i", po::value<CountType>()->default_value(10), ": least # of iterations")
+    ("maxiter,j", po::value<CountType>()->default_value(0), ": max # of iterations (0: unlimited)")
     ("ell,l", po::value<int>()->default_value(-1), ": specify ell (max{s-r,0}<=ell<=s+r) (-1: all)")
     ("onlyu,u", ": estimate only u of the radius")
     ("elapsed,e", ": print the elapsed time in milliseconds")
@@ -53,7 +54,8 @@ int main(int argc, char **argv)
   int k = argmap["k"].as<int>();
   std::vector<int> center(argmap["string"].as<int>(), 0);
   int radius = argmap["radius"].as<int>();
-  CountType iterations = argmap["iterations"].as<int>();
+  CountType iterations = argmap["iterations"].as<CountType>();
+  CountType maxiter = argmap["maxiter"].as<CountType>();
   int ell = argmap["ell"].as<int>();
   bool is_only_u = (method == 0) and (argmap.count("onlyu") or (ell >= 0));
   bool is_quiet = argmap.count("quiet");
@@ -78,7 +80,7 @@ int main(int argc, char **argv)
   auto countfunc = [&](auto dist) {
     switch (method) {
       case 0:
-        estimate(k, center, radius, dist, iterations, ell, is_only_u);
+        estimate(k, center, radius, dist, iterations, maxiter, ell, is_only_u);
         break;
       case 1:
         searchall(k, center, radius, dist);
