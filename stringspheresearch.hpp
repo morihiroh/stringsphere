@@ -111,6 +111,9 @@ void estimate(
         ur[r] = urlsum;
         std::cout << "\t" << urlsum - ur[r-1];
       }
+      if (not iterflag) {
+        std::cout << "\t(Warning: Forcibly finished because of too many trials (>=" << maxiter << "))";
+      }
       std::cout << "\n";
     }
   }
