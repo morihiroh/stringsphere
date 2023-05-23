@@ -8,17 +8,6 @@
 #include "stringdistance.hpp"
 #include "stringspheresearch.hpp"
 
-std::vector<int> parsestring(const std::string& s)
-{
-  std::vector<std::string> t;
-  boost::algorithm::split(t, s, boost::is_any_of(","));
-  std::vector<int> res(t.size());
-  for (size_t i = 0; i < t.size(); i++) {
-    res[i] = boost::lexical_cast<int>(t[i]);
-  }
-  return res;
-}
-
 int main(int argc, char **argv)
 {
   using namespace std;
@@ -27,8 +16,9 @@ int main(int argc, char **argv)
 
   opt.add_options()
     ("distance,d", po::value<int>()->default_value(2), ": 0: Extended Hamming 1: Longest common subsequence 2: Levenshtein 3: Damerau-Levenshtein")
-    ("k,k", po::value<int>()->default_value(2), ": the size of alphabet A")
-    ("string,s", po::value<int>()->default_value(3), ": the length of center string")
+    ("k,k", po::value<int>()->default_value(2), ": the size |A| of alphabet A")
+    ("string,s", po::value<int>()->default_value(0), ": the center string in decimal number. Ex) 3 means 011 in |A|=2 and the length = 3.")
+    ("size,z", po::value<int>()->default_value(3), ": the length (size) of center string")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
     ("method,m", po::value<int>()->default_value(0), ": 0: random selection method 1: exhaustive search method")
     ("iterations,i", po::value<CountType>()->default_value(10), ": least # of iterations")
@@ -52,7 +42,8 @@ int main(int argc, char **argv)
   int method = argmap["method"].as<int>();
   int distancetype = argmap["distance"].as<int>();
   int k = argmap["k"].as<int>();
-  std::vector<int> center(argmap["string"].as<int>(), 0);
+  std::vector<int> center(argmap["size"].as<int>(), 0);
+  radix_convert(center, k, argmap["string"].as<int>());
   int radius = argmap["radius"].as<int>();
   CountType iterations = argmap["iterations"].as<CountType>();
   CountType maxiter = argmap["maxiter"].as<CountType>();
@@ -100,19 +91,23 @@ int main(int argc, char **argv)
     std::cout << " with ";
     switch (distancetype) {
       case 0:
-        std::cout << "extended Hamming distance\n";
+        std::cout << "extended Hamming distance";
         break;
       case 1:
-        std::cout << "longest common subsequence\n";
+        std::cout << "longest common subsequence";
         break;
       case 2:
-        std::cout << "Levenshtein distance\n";
+        std::cout << "Levenshtein distance";
         break;
       case 3:
-        std::cout << "Damerau-Levenshtein distance\n";
+        std::cout << "Damerau-Levenshtein distance";
         break;
     }
-    std::cout << "k\ts\tr\tu";
+    std::cout << " for center s = ";
+    for (int i = center.size() - 1; i >= 0; i--) {
+      std::cout << center[i];
+    }
+    std::cout << "\n|A|\t|s|\tradius\tu";
     if (not is_only_u) {
       std::cout << "\tv";
     }

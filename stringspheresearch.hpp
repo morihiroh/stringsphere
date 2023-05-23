@@ -8,6 +8,16 @@
 typedef unsigned long long int CountType;
 typedef long double FloatType;
 
+inline void radix_convert(std::vector<int>& s, const int k, const int x) {
+  std::lldiv_t tmp;
+  tmp.quot = x;
+  int len = s.size();
+  for (int i = 0; i < len; i++) {
+    tmp = std::lldiv(tmp.quot, k);
+    s[i] = tmp.rem;
+  }
+}
+
 template <typename DistanceTag>
 void estimate(
     const int k,  // the size of alphabet
@@ -76,12 +86,8 @@ void estimate(
         FloatType coeff = 400.0 * fkl * (1-1/fkl);
         for (CountType n = 1; n <= kl; n++) {
           rnd = (rnd * random_A + random_B) % kl;
-          std::lldiv_t tmp;
-          tmp.quot = rnd;
-          for (int i = 0; i < l; i++) {
-            tmp = std::lldiv(tmp.quot, k);
-            sn[i] = tmp.rem;
-          }
+          radix_convert(sn, k, rnd);
+
           auto d = measure(center, sn, DistanceTag());
           if (within(d, r, typename DistanceTag::CompareType())) {
             x++;
