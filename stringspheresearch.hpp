@@ -81,12 +81,12 @@ void estimate(
         sn.resize(l);
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
-        CountType rnd = std::time(nullptr) % kl;
+        CountType rnd = std::time(nullptr) % kl;  // initialization for random numbers
         FloatType fkl = kl;
         FloatType coeff = 400.0 * fkl * (1-1/fkl);
         for (CountType n = 1; n <= kl; n++) {
-          rnd = (rnd * random_A + random_B) % kl;
-          radix_convert(sn, k, rnd);
+          rnd = (rnd * random_A + random_B) % kl; // linear congruential generator
+          radix_convert(sn, k, rnd);              // convert a number 'rnd' to a string
 
           auto d = measure(center, sn, DistanceTag());
           if (within(d, r, typename DistanceTag::CompareType())) {
