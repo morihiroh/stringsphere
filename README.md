@@ -23,6 +23,13 @@ g++ -O3 -lboost_program_options stringsphere.cpp
 
 stringsphere -h (display help message)
 
-## Example
+ - Example
 
-$u_i(x^2,\sum k)$
+```
+stringsphere -m 0 -k 2 -z 5 -s 3 -r 3 -q
+
+2       5       0       1       1
+2       5       1       15      14
+2       5       2       84      69
+2       5       3       273     189
+```
