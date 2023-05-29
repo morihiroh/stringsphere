@@ -21,6 +21,8 @@ stringsphere computes estimates of the volumes of balls and spheres of strings u
 g++ -O3 -lboost_program_options stringsphere.cpp
 ```
 
+It can be compiled by g++ [GNU C++ compiler](https://gcc.gnu.org) version 12.3 with the boost program options library.
+
 3. Usage
 
  - Options
