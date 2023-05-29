@@ -7,7 +7,7 @@ stringsphere is a softwawe implemented in C++ for computing estimates of the vol
 Please see the following paper for how and why this softwawe was developed.
 
 ```
-Hitoshi Koyano and Morihiro Hayashida, *Volume formula and growth rates of the balls of strings under the edit distances*, **submitted**.
+Hitoshi Koyano and Morihiro Hayashida, Volume formula and growth rates of the balls of strings under the edit distances, submitted.
 ```
 
 In this paper, the volume formula for the balls of strings under the extended Hamming distance was derived. 
@@ -23,7 +23,27 @@ g++ -O3 -lboost_program_options stringsphere.cpp
 
 3. Usage
 
-stringsphere -h (display help message)
+ - Options
+
+```
+  -d [ --distance ] arg (=2)    : 0: Extended Hamming 1: Longest common
+                                subsequence 2: Levenshtein 3:
+                                Damerau-Levenshtein
+  -k [ --k ] arg (=2)           : the size |A| of alphabet A
+  -s [ --string ] arg (=0)      : the center string in decimal number. Ex) 3
+                                means 011 in |A|=2 and the length = 3.
+  -z [ --size ] arg (=3)        : the length (size) of center string
+  -r [ --radius ] arg (=2)      : radius
+  -m [ --method ] arg (=0)      : 0: random selection method 1: exhaustive
+                                search method
+  -i [ --iterations ] arg (=10) : least # of iterations
+  -j [ --maxiter ] arg (=0)     : max # of iterations (0: unlimited)
+  -l [ --ell ] arg (=-1)        : specify ell (max{s-r,0}<=ell<=s+r) (-1: all)
+  -u [ --onlyu ]                : estimate only u of the radius
+  -e [ --elapsed ]              : print the elapsed time in milliseconds
+  -q [ --quiet ]                : display only results
+  -h [ --help ]                 : show this help message
+```
 
  - Example
 
