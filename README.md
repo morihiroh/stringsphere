@@ -62,5 +62,5 @@ Random selection method with Levenshtein distance for center s = 00011
 2       5       3       273     189
 ```
 
-This example shows the results of $U_{2,d_L}(00011,3)$ and $V_{2,d_L}(00011,3)$ by the randomized algorithm on $A=\{0,1\}$ for $\phi=00011$. 
+This example shows the results of $U_{2,d_L}(00011,3)$ and $V_{2,d_L}(00011,3)$ by the randomized algorithm on $A=\\{0,1\\}$ for $\phi=00011$. 
 
