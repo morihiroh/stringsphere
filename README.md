@@ -52,10 +52,15 @@ We can use the following options to this software.
  - Example
 
 ```
-stringsphere -m 0 -k 2 -z 5 -s 3 -r 3 -q
+stringsphere -m 0 -k 2 -z 5 -s 3 -r 3
 
+Random selection method with Levenshtein distance for center s = 00011
+|A|     |s|     radius  u       v
 2       5       0       1       1
 2       5       1       15      14
 2       5       2       84      69
 2       5       3       273     189
 ```
+
+This example shows the results of $U_{2,d_L}(00011,3)$ and $V_{2,d_L}(00011,3)$ by the randomized algorithm on $A=\{0,1\}$ for $\phi=00011$. 
+
