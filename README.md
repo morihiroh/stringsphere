@@ -55,9 +55,8 @@ We can use the following options to this software.
  - Example
 
 ```
-stringsphere -m 0 -k 2 -z 5 -s 3 -r 3
-
-Random selection method with Levenshtein distance for center s = 00011
+./stringsphere -m 2 -k 2 -z 5 -s 3 -r 3
+Random selection method with absolute error in Levenshtein distance for center s = "00011"
 |A|     |s|     radius  u       v
 2       5       0       1       1
 2       5       1       15      14
