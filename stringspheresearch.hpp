@@ -57,22 +57,39 @@ void estimate(
   std::cout << "\n";
 
   if (radius >= 1) {
+    if (s == 0) { // Case 2
+      CountType kl = k;
+      CountType u = 1;
+      for (int r = 1; r <= radius; r++, kl *= k) {
+        u += kl;
+        std::cout << k << "\t" << s << "\t" << r << "\t" << u << "\t" << kl << "\n";
+      }
+      return;
+    }
+
     std::vector<int> sn(center.size() + radius);
     std::vector<CountType> ur(radius + 1);
 
     CountType numiter = 0;
-    ur[0] = 1;  // when r = 0
+    ur[0] = 1;  // for r = 0
     for (int r = 1; r <= radius; r++) {
-      int c = s - r;
-      if (c < 0) c = 0;
-      int lmax = s + r;
+      const int lmax = s + r;
       CountType urlsum = 0;
       CountType kl = 1;
-      for (int i = 0; i < c; i++) {
-        kl *= k;
+      int c = s - r;
+      if (c <= 0) { // Case 3
+        c = r + 1;
+        for (int i = 0; i < c; i++) {
+          urlsum += kl;
+          kl *= k;
+        }
+      } else {  // Case 4
+        for (int i = 0; i < c; i++) {
+          kl *= k;
+        }
       }
       bool iterflag = true;
-      for (int l = c; iterflag and l <= lmax; l++, kl *= k) {
+      for (int l = c; iterflag and l <= lmax; l++, kl *= k) { // Component
         sn.resize(l);
         CountType least_iterations = std::min(iterations, kl);
         CountType x = 0;
