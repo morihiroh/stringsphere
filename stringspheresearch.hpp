@@ -51,6 +51,7 @@ void estimate(
   }
 
   int s = center.size();
+  FloatType gammasq = gamma * gamma;
 
   std::cout << k << "\t" << s << "\t0\t1";
   std::cout << "\t1";
@@ -76,8 +77,10 @@ void estimate(
       const int lmax = s + r;
       CountType urlsum = 0;
       CountType kl = 1;
+      bool case3flag = false;
       int c = s - r;
       if (c <= 0) { // Case 3
+        case3flag = true;
         c = r + 1;
         for (int i = 0; i < c; i++) {
           urlsum += kl;
@@ -95,7 +98,6 @@ void estimate(
         CountType x = 0;
         CountType rnd = std::time(nullptr) % kl;  // initialization for random numbers
         FloatType fkl = kl;
-        FloatType coeff = 400.0 * fkl * (1-1/fkl);
         for (CountType n = 1; n <= kl; n++) {
           rnd = (rnd * random_A + random_B) % kl; // linear congruential generator
           radix_convert(sn, k, rnd);              // convert a number 'rnd' to a string
@@ -113,9 +115,45 @@ void estimate(
           } else if (n >= least_iterations and x > 0) {
             FloatType fn = n;
             FloatType p = (FloatType)x/fn;
-            if (fn >= coeff * p * (1-p) * (fkl - fn)) {
-              //std::cout << "l=" << l << "\tx=" << x << "\tu=" << p*fkl << "\tp=" << p << "\t" << (FloatType)n/(FloatType)kl << "\tn=" << n << "\tkl=" << kl << "\n";
-              urlsum += (CountType)(0.5 + p * fkl);
+            FloatType pfkl = p * fkl;
+            FloatType gsq = 0.0;
+            if (method == 2) {  // absolute error
+              if (case3flag) {
+                if (epsilon >= s) {
+                  double t = epsilon / s - 0.5;
+                  gsq = t * t / s;
+                } else {
+                  gsq = 0.25 / s;
+                }
+              } else {
+                double fr = 2.0 * r + 1.0;
+                if (epsilon >= fr) {
+                  double t = epsilon / fr - 0.5;
+                  gsq = t * t / fr;
+                } else {
+                  gsq = 0.25 / fr;
+                }
+              }
+            } else {            // relative error
+              if (case3flag) {
+                if (epsilon >= s / pfkl) {
+                  FloatType t = epsilon * pfkl / s - 0.5;
+                  gsq = t * t / s;
+                } else {
+                  gsq = 0.25 / s;
+                }
+              } else {
+                double fr = 2.0 * r + 1.0;
+                if (epsilon >= fr / pfkl) {
+                  FloatType t = epsilon * pfkl / fr - 0.5;
+                  gsq = t * t / fr;
+                } else {
+                  gsq = 0.25 / fr;
+                }
+              }
+            }
+            if (fn >= fkl * (1.0 + gammasq * pfkl * (1.0 - p) * fkl / (gsq * (fkl - 1.0)))) {
+              urlsum += (CountType)(0.5 + pfkl);
               break;
             }
           }
