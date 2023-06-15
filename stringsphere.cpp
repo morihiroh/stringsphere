@@ -20,7 +20,9 @@ int main(int argc, char **argv)
     ("string,s", po::value<int>()->default_value(0), ": the center string in decimal number. Ex) 3 means 011 in |A|=2 and the length = 3.")
     ("size,z", po::value<int>()->default_value(3), ": the length (size) of center string")
     ("radius,r", po::value<int>()->default_value(2), ": radius")
-    ("method,m", po::value<int>()->default_value(0), ": 0: random selection method 1: exhaustive search method")
+    ("method,m", po::value<int>()->default_value(2), std::string(": 1: exhaustive search method 2: random selection with absolute error 3: random selection with relative error").c_str())
+    ("gamma,g", po::value<double>()->default_value(1.0), ": specify gamma >= 1")
+    ("epsilon,p", po::value<double>()->default_value(0.1), ": specify epsilon > 0")
     ("iterations,i", po::value<CountType>()->default_value(10), ": least # of iterations")
     ("maxiter,j", po::value<CountType>()->default_value(0), ": max # of iterations (0: unlimited)")
     ("ell,l", po::value<int>()->default_value(-1), ": specify ell (max{s-r,0}<=ell<=s+r) (-1: all)")
@@ -40,6 +42,8 @@ int main(int argc, char **argv)
   }
 
   int method = argmap["method"].as<int>();
+  double gamma = argmap["gamma"].as<double>();
+  double epsilon = argmap["epsilon"].as<double>();
   int distancetype = argmap["distance"].as<int>();
   int k = argmap["k"].as<int>();
   std::vector<int> center(argmap["size"].as<int>(), 0);
@@ -70,25 +74,29 @@ int main(int argc, char **argv)
 
   auto countfunc = [&](auto dist) {
     switch (method) {
-      case 0:
-        estimate(k, center, radius, dist, iterations, maxiter, ell, is_only_u);
-        break;
       case 1:
         searchall(k, center, radius, dist);
+        break;
+      case 2:
+      case 3:
+        estimate(method, gamma, epsilon, k, center, radius, dist, iterations, maxiter, ell, is_only_u);
         break;
     } 
   };
 
   if (not is_quiet) {
     switch (method) {
-      case 0:
-        std::cout << "Random selection method";
-        break;
       case 1:
         std::cout << "Exhaustive search method";
         break;
+      case 2:
+        std::cout << "Random selection method with absolute error";
+        break;
+      case 3:
+        std::cout << "Random selection method with relative error";
+        break;
     }
-    std::cout << " with ";
+    std::cout << " in ";
     switch (distancetype) {
       case 0:
         std::cout << "extended Hamming distance";
@@ -103,11 +111,11 @@ int main(int argc, char **argv)
         std::cout << "Damerau-Levenshtein distance";
         break;
     }
-    std::cout << " for center s = ";
+    std::cout << " for center s = \"";
     for (int i = center.size() - 1; i >= 0; i--) {
       std::cout << center[i];
     }
-    std::cout << "\n|A|\t|s|\tradius\tu";
+    std::cout << "\"\n|A|\t|s|\tradius\tu";
     if (not is_only_u) {
       std::cout << "\tv";
     }

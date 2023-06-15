@@ -20,6 +20,9 @@ inline void radix_convert(std::vector<int>& s, const int k, const int x) {
 
 template <typename DistanceTag>
 void estimate(
+    const int method,
+    const double gamma,
+    const double epsilon,
     const int k,  // the size of alphabet
     const std::vector<int>& center, // center string
     const int radius, // radius
