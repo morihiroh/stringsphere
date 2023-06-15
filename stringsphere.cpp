@@ -25,8 +25,8 @@ int main(int argc, char **argv)
     ("epsilon,p", po::value<double>()->default_value(0.1), ": specify epsilon > 0")
     ("iterations,i", po::value<CountType>()->default_value(10), ": least # of iterations")
     ("maxiter,j", po::value<CountType>()->default_value(0), ": max # of iterations (0: unlimited)")
-    ("ell,l", po::value<int>()->default_value(-1), ": specify ell (max{s-r,0}<=ell<=s+r) (-1: all)")
-    ("onlyu,u", ": estimate only u of the radius")
+    //("ell,l", po::value<int>()->default_value(-1), ": specify ell (max{s-r,0}<=ell<=s+r) (-1: all)")
+    //("onlyu,u", ": estimate only u of the radius")
     ("elapsed,e", ": print the elapsed time in milliseconds")
     ("quiet,q", ": display only results")
     ("help,h", ": show this help message");
@@ -51,8 +51,8 @@ int main(int argc, char **argv)
   int radius = argmap["radius"].as<int>();
   CountType iterations = argmap["iterations"].as<CountType>();
   CountType maxiter = argmap["maxiter"].as<CountType>();
-  int ell = argmap["ell"].as<int>();
-  bool is_only_u = (method == 0) and (argmap.count("onlyu") or (ell >= 0));
+  //int ell = argmap["ell"].as<int>();
+  //bool is_only_u = (method == 0) and (argmap.count("onlyu") or (ell >= 0));
   bool is_quiet = argmap.count("quiet");
 
   auto swfunc = [](int distancetype, auto func) {
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         break;
       case 2:
       case 3:
-        estimate(method, gamma, epsilon, k, center, radius, dist, iterations, maxiter, ell, is_only_u);
+        estimate(method, gamma, epsilon, k, center, radius, dist, iterations, maxiter);
         break;
     } 
   };
@@ -116,9 +116,9 @@ int main(int argc, char **argv)
       std::cout << center[i];
     }
     std::cout << "\"\n|A|\t|s|\tradius\tu";
-    if (not is_only_u) {
+    //if (not is_only_u) {
       std::cout << "\tv";
-    }
+    //}
     std::cout << "\n";
   }
 

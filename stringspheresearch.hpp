@@ -28,9 +28,9 @@ void estimate(
     const int radius, // radius
     DistanceTag, // distance function
     const CountType iterations, // least # iterations 
-    const CountType maxiter, // max # iterations 
-    const int ell, // specify ell (-1: all)
-    const bool is_only_u // estimate only u
+    const CountType maxiter // max # iterations 
+                            //const int ell, // specify ell (-1: all)
+                            //const bool is_only_u // estimate only u
     ) {
 
   if (log2((double)k)*(center.size() + radius) > sizeof(CountType)*8) {
@@ -52,28 +52,20 @@ void estimate(
 
   int s = center.size();
 
-  if (radius == 0 or not is_only_u) {
-    std::cout << k << "\t" << s << "\t0\t1";
-    if (not is_only_u) {
-      std::cout << "\t1";
-    }
-    std::cout << "\n";
-  }
+  std::cout << k << "\t" << s << "\t0\t1";
+  std::cout << "\t1";
+  std::cout << "\n";
 
   if (radius >= 1) {
     std::vector<int> sn(center.size() + radius);
     std::vector<CountType> ur(radius + 1);
 
     CountType numiter = 0;
-    ur[0] = 1;
-    for (int r = is_only_u ? radius : 1; r <= radius; r++) {
+    ur[0] = 1;  // when r = 0
+    for (int r = 1; r <= radius; r++) {
       int c = s - r;
       if (c < 0) c = 0;
       int lmax = s + r;
-      if (ell >= 0) {
-        c = ell;
-        lmax = ell;
-      }
       CountType urlsum = 0;
       CountType kl = 1;
       for (int i = 0; i < c; i++) {
@@ -113,13 +105,8 @@ void estimate(
         }
       }
       std::cout << k << "\t" << s << "\t" << r << "\t" << urlsum;
-      if (ell >= 0) {
-        std::cout << "\t(ell=" << ell << ")";
-      }
-      if (not is_only_u) {
-        ur[r] = urlsum;
-        std::cout << "\t" << urlsum - ur[r-1];
-      }
+      ur[r] = urlsum;
+      std::cout << "\t" << urlsum - ur[r-1];
       if (not iterflag) {
         std::cout << "\t(Warning: Forcibly finished because of too many trials (>=" << maxiter << "))";
       }
