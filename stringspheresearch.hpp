@@ -152,7 +152,7 @@ void estimate(
                 }
               }
             }
-            if (fn >= fkl * (1.0 + gammasq * pfkl * (1.0 - p) * fkl / (gsq * (fkl - 1.0)))) {
+            if (fn >= fkl / (1.0 + gsq * (fkl - 1.0) / (gammasq * pfkl * (1.0 - p) * fkl))) {
               urlsum += (CountType)(0.5 + pfkl);
               break;
             }
