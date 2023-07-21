@@ -7,7 +7,7 @@ stringsphere is a softwawe implemented in C++ for computing estimates of the vol
 Please see the following paper for how and why this softwawe was developed.
 
 ```
-Hitoshi Koyano and Morihiro Hayashida, Volume formula and growth rates of the balls of strings under the edit distances, submitted.
+Hitoshi Koyano and Morihiro Hayashida, Volume formula and growth rates of the balls of strings under the edit distances, Applied Mathematics and Computation, 458, 128202 (2023)
 ```
 
 In this paper, the volume formula for the balls of strings under the extended Hamming distance was derived. 
